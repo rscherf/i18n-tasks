@@ -66,8 +66,9 @@ module I18n::Tasks
       def dump_value(value)
         case value
         when Array
-          # dump recursively
           value.map { |v| dump_value v }
+        when Hash
+          value.map { |k,v| dump_value v }
         when String
           replace_interpolations value unless value.empty?
         end
@@ -80,8 +81,19 @@ module I18n::Tasks
       def parse_value(untranslated, each_translated)
         case untranslated
         when Array
-          # implode array
-          untranslated.map { |from| parse_value(from, each_translated) }
+          untranslated.map { |from|
+            parse_value(from, each_translated)
+          }
+
+        when Hash
+          untranslated.transform_values { |v|
+            if v.is_a? String
+              each_translated.next
+            else
+              parse_value(v, each_translated)
+            end
+          }
+
         when String
           if untranslated.empty?
             untranslated
