@@ -87,8 +87,10 @@ module I18n::Tasks
 
         when Hash
           untranslated.transform_values { |v|
-            if v.is_a? String
-              each_translated.next
+            case v
+            when String
+              # each_translated.next
+              parse_value(v, each_translated.next)
             else
               parse_value(v, each_translated)
             end
